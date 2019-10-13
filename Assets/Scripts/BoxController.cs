@@ -21,6 +21,7 @@ public class BoxController : MonoBehaviour{
     public float highScore = 0;
 
     public GameObject staticBox;
+    public GameObject spawnPoint;
 
     // Start is called before the first frame update
     void Start()
@@ -44,9 +45,22 @@ public class BoxController : MonoBehaviour{
             Swipe();
         }
 
-        if (Input.GetKeyDown("r"))  SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        if (Input.GetKeyDown("r"))  SceneManager.LoadScene(SceneManager.GetActiveScene().name);    
+    }
 
-        if (velX == 0 && velY == 0 && thrown) {
+    void OnCollisionEnter(Collision collision){
+        if (collision.gameObject.tag == "LandingPlatform"){
+            StartCoroutine(checkVelocity());
+        }
+    }
+
+    IEnumerator checkVelocity()
+    {
+        yield return new WaitForSeconds(1f);
+        Debug.Log("xVel " + rb.velocity.x);
+        Debug.Log("yVel " + rb.velocity.y);
+        if (rb.velocity.x < 0.01 && rb.velocity.y < 0.01 && thrown)
+        {
             landed();
         }
     }
@@ -55,7 +69,7 @@ public class BoxController : MonoBehaviour{
         if (!thrown) {
             Vector2 swipe = endPos - startPos;
 
-            Debug.Log(swipe);
+            //Debug.Log(swipe);
 
             rb.AddForce(swipe * force, ForceMode.Impulse);
             rb.AddTorque(0f, 0f, torque, ForceMode.Impulse);
@@ -68,7 +82,9 @@ public class BoxController : MonoBehaviour{
         //creates static box and resets player box
         highScore = transform.position.y;
         Debug.Log(highScore);
-        Instantiate(staticBox);
+        
+        Instantiate(staticBox,new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity);
+        transform.position = spawnPoint.transform.position;
         thrown = false;
     }
 }
